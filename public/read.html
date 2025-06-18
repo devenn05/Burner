@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- NEW: Favicon added -->
+    <link rel="icon" type="image/png" href="/icons/icon.png">
     <title>View Secure Message</title>
     <style>
         :root {
@@ -46,6 +48,15 @@
         }
         .secure-word:hover { filter: blur(0); opacity: 1; }
         .secure-word.revealed { filter: blur(0); opacity: 1; }
+        /* NEW: Style for the secure mode disclaimer */
+        #secure-disclaimer {
+            font-size: 0.85em;
+            color: var(--error-color);
+            text-align: center;
+            margin-top: -10px; /* Pull it closer to the timer */
+            margin-bottom: 15px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -61,6 +72,8 @@
             </div>
             <div id="message-container" style="display:none;">
                 <p id="burn-countdown">This message will self-destruct in <span id="countdown-timer">10</span> seconds</p>
+                <!-- NEW: Disclaimer element -->
+                <p id="secure-disclaimer" style="display: none;"></p>
                 <div id="message-display-wrapper"></div>
             </div>
         </div>
@@ -74,83 +87,24 @@
         readPasswordInput: document.getElementById('read-password'), burnCountdown: document.getElementById('burn-countdown'),
         countdownTimerSpan: document.getElementById('countdown-timer'),
         messageDisplayWrapper: document.getElementById('message-display-wrapper'),
+        secureDisclaimer: document.getElementById('secure-disclaimer'), // New element
     };
+    // All other JS is unchanged, only displayAndStartTimer is modified
     let dataFetchedFromServer = null;
     let countdownInterval = null;
     let isBurned = false;
     let secureModeListeners = [];
     const internalNoPassKey = "ThisIsASecretKeyForPasswordlessMessages-7a9b3c_d4e5f6";
 
-    const decryptMessageData = async (encryptedData, password) => {
-        try {
-            const combined = new Uint8Array(atob(encryptedData).split('').map(c => c.charCodeAt(0)));
-            const salt = combined.slice(0, 16); const iv = combined.slice(16, 28);
-            const ciphertext = combined.slice(28, combined.length - 4);
-            const timer = new DataView(combined.buffer).getUint32(combined.length - 4, false);
-            const keyMaterial = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
-            const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
-            const decryptedPayload = new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext));
-            const [securityLevel, ...messageParts] = decryptedPayload.split('::');
-            const message = messageParts.join('::');
-            return { message, timer, securityLevel };
-        } catch (e) { return null; }
-    };
-
-    const showPermanentlyBurnedState = (message = "This link has expired or was already used.") => {
-        if (isBurned) return;
-        isBurned = true;
-        if (countdownInterval) clearInterval(countdownInterval);
-        deactivateSecureModeDefenses();
-        elements.decryptPrompt.style.display = 'none';
-        elements.messageContainer.style.display = 'block';
-        elements.messageDisplayWrapper.innerHTML = `<div style="text-align: center; cursor: default;"><p style="color: var(--error-color); font-size: 1.5em; font-weight: bold; margin: 0;">LINK EXPIRED</p><p style="font-size: 0.9em; color: var(--subtitle-color); margin-top: 10px;">${message}</p></div>`;
-        elements.burnCountdown.style.display = 'none';
-    };
-
-    const addListener = (element, event, handler) => {
-        element.addEventListener(event, handler);
-        secureModeListeners.push({ element, event, handler });
-    };
-
-    const deactivateSecureModeDefenses = () => {
-        secureModeListeners.forEach(({ element, event, handler }) => element.removeEventListener(event, handler));
-        secureModeListeners = [];
-    };
-
-    const activateSecureModeDefenses = (originalMessage) => {
-        const instantBurn = () => showPermanentlyBurnedState("SECURITY ALERT: Suspicious activity detected. Message burned.");
-        const keyListener = (e) => { if (['PrintScreen', 'Meta', 'Super', 'Hyper'].includes(e.key)) instantBurn(); };
-        const contextListener = (e) => { e.preventDefault(); instantBurn(); };
-        
-        addListener(window, 'blur', instantBurn);
-        addListener(document, 'keyup', keyListener);
-        addListener(document, 'contextmenu', contextListener);
-
-        elements.messageDisplayWrapper.innerHTML = '';
-        const words = originalMessage.split(/(\s+)/); // Split by spaces but keep them
-
-        words.forEach((word, index) => {
-            if (word.trim() === '') {
-                elements.messageDisplayWrapper.appendChild(document.createTextNode(word));
-                return;
-            }
-            const wordSpan = document.createElement('span');
-            wordSpan.textContent = word;
-            
-            if (index === 0) {
-                wordSpan.className = 'secure-word revealed';
-            } else {
-                wordSpan.className = 'secure-word';
-            }
-            elements.messageDisplayWrapper.appendChild(wordSpan);
-        });
-    };
-
+    // NEW: Updated display function
     const displayAndStartTimer = (result) => {
         elements.decryptPrompt.style.display = 'none';
         elements.messageContainer.style.display = 'block';
         
         if (result.securityLevel === 'secure') {
+            // Show the disclaimer for secure mode
+            elements.secureDisclaimer.textContent = 'Any tampering (screenshot, right-click, changing windows) will terminate the message immediately.';
+            elements.secureDisclaimer.style.display = 'block';
             activateSecureModeDefenses(result.message);
         } else {
             elements.messageDisplayWrapper.textContent = result.message;
@@ -168,45 +122,75 @@
         }, 1000);
     };
 
+    // --- All other JS functions are correct and unchanged ---
+    const decryptMessageData = async (encryptedData, password) => {
+        try {
+            const combined = new Uint8Array(atob(encryptedData).split('').map(c => c.charCodeAt(0)));
+            const salt = combined.slice(0, 16); const iv = combined.slice(16, 28);
+            const ciphertext = combined.slice(28, combined.length - 4);
+            const timer = new DataView(combined.buffer).getUint32(combined.length - 4, false);
+            const keyMaterial = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), { name: "PBKDF2" }, false, ["deriveKey"]);
+            const key = await crypto.subtle.deriveKey({ name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" }, keyMaterial, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+            const decryptedPayload = new TextDecoder().decode(await crypto.subtle.decrypt({ name: "AES-GCM", iv }, key, ciphertext));
+            const [securityLevel, ...messageParts] = decryptedPayload.split('::');
+            const message = messageParts.join('::');
+            return { message, timer, securityLevel };
+        } catch (e) { return null; }
+    };
+    const showPermanentlyBurnedState = (message = "This link has expired or was already used.") => {
+        if (isBurned) return; isBurned = true; if (countdownInterval) clearInterval(countdownInterval);
+        deactivateSecureModeDefenses();
+        elements.decryptPrompt.style.display = 'none'; elements.messageContainer.style.display = 'block';
+        elements.messageDisplayWrapper.innerHTML = `<div style="text-align: center; cursor: default;"><p style="color: var(--error-color); font-size: 1.5em; font-weight: bold; margin: 0;">LINK EXPIRED</p><p style="font-size: 0.9em; color: var(--subtitle-color); margin-top: 10px;">${message}</p></div>`;
+        elements.burnCountdown.style.display = 'none';
+    };
+    const addListener = (element, event, handler) => {
+        element.addEventListener(event, handler);
+        secureModeListeners.push({ element, event, handler });
+    };
+    const deactivateSecureModeDefenses = () => {
+        secureModeListeners.forEach(({ element, event, handler }) => element.removeEventListener(event, handler));
+        secureModeListeners = [];
+    };
+    const activateSecureModeDefenses = (originalMessage) => {
+        const instantBurn = () => showPermanentlyBurnedState("SECURITY ALERT: Suspicious activity detected. Message burned.");
+        const keyListener = (e) => { if (['PrintScreen', 'Meta', 'Super', 'Hyper'].includes(e.key)) instantBurn(); };
+        const contextListener = (e) => { e.preventDefault(); instantBurn(); };
+        addListener(window, 'blur', instantBurn); addListener(document, 'keyup', keyListener); addListener(document, 'contextmenu', contextListener);
+        elements.messageDisplayWrapper.innerHTML = '';
+        const words = originalMessage.split(/(\s+)/);
+        words.forEach((word, index) => {
+            if (word.trim() === '') { elements.messageDisplayWrapper.appendChild(document.createTextNode(word)); return; }
+            const wordSpan = document.createElement('span');
+            wordSpan.textContent = word;
+            if (index === 0) { wordSpan.className = 'secure-word revealed'; } else { wordSpan.className = 'secure-word'; }
+            elements.messageDisplayWrapper.appendChild(wordSpan);
+        });
+    };
     elements.viewMessageBtn.addEventListener('click', async () => {
         const password = elements.readPasswordInput.value;
         if (!password || !dataFetchedFromServer) return;
         elements.viewMessageBtn.disabled = true; elements.readPasswordInput.disabled = true;
         const result = await decryptMessageData(dataFetchedFromServer, password);
-        if (!result) {
-            showNotification('Decryption failed. Incorrect password.');
-            showPermanentlyBurnedState('Decryption failed. The link has been burned.');
-            return;
-        }
+        if (!result) { showNotification('Decryption failed. Incorrect password.'); showPermanentlyBurnedState('Decryption failed. The link has been burned.'); return; }
         displayAndStartTimer(result);
     });
-
     window.addEventListener('load', async () => {
         const id = window.location.hash.substring(1);
         if (!id) return showPermanentlyBurnedState("Invalid or missing message link.");
-        
         try {
             const response = await fetch(`/api/message/${id}`);
             if (!response.ok) return showPermanentlyBurnedState();
-            
             const { encryptedData } = await response.json();
             dataFetchedFromServer = encryptedData;
-
-            // THIS IS THE CORRECTED LOGIC
             const noPassResult = await decryptMessageData(dataFetchedFromServer, internalNoPassKey);
-            
             if (noPassResult) {
-                // SUCCESS: It's a password-less message. Display it immediately.
                 displayAndStartTimer(noPassResult);
             } else {
-                // FAILURE: It requires a user-provided password. Show the prompt.
                 elements.warningText.innerHTML = "<strong>SECURITY WARNING:</strong> You must hover over each word to reveal it. Any attempt to screenshot or change windows will instantly burn the message.";
                 elements.decryptPrompt.style.display = 'block';
             }
-        } catch (err) {
-            showNotification('Error contacting server.');
-            showPermanentlyBurnedState("Could not connect to the message server.");
-        }
+        } catch (err) { showNotification('Error contacting server.'); showPermanentlyBurnedState("Could not connect to the message server."); }
     });
 </script>
 </body>
