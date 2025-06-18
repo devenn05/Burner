@@ -58,7 +58,9 @@ The Secure Message Burner utilizes a hybrid client-server architecture centered 
 
 ## 💡 Project Overview
 
-This project was developed to explore the intersection of web security and user interface design. It aims to provide a practical solution for ephemeral communication while addressing advanced challenges like deterring unauthorized screen captures.
+Initially, this project began as an exploration into developing a unique messaging platform. As I delved deeper into the technical challenges, the focus evolved towards creating a robust, secure, and truly ephemeral message burner. This shift allowed for a concentrated effort on client-side encryption and server-side message destruction.
+
+I plan to continue developing this project, with future enhancements potentially including the ability to send these secure links anonymously, though the exact implementation details for this feature are still being explored.
 
 This application demonstrates proficiency in:
 
