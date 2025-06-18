@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="/icons/icon.jpeg">
+    <title>View Secure Message</title>
+    <link rel="stylesheet" href="/css/style-read.css">
+</head>
+<body>
+    <div class="container">
+        <div id="notification" class="notification"></div>
+        <h1>View Secure Message</h1>
+        <div id="read-container">
+            <div id="decrypt-prompt" style="display: none;">
+                <p id="warning-text" class="note"></p>
+                <label for="read-password">Enter Password:</label>
+                <input type="password" id="read-password" placeholder="Password from sender">
+                <button id="view-message-btn">View & Burn Message</button>
+            </div>
+            <div id="message-container" style="display:none;">
+                <p id="burn-countdown">This message will self-destruct in <span id="countdown-timer">10</span> seconds</p>
+                <p id="secure-disclaimer" style="display: none;"></p>
+                <div id="message-display-wrapper"></div>
+            </div>
+        </div>
+    </div>
+    <script src="/js/app-read.js"></script>
+</body>
+</html>

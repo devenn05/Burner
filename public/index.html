@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="/icons/icon.jpeg">
+    <title>Create a Secure Message</title>
+    <link rel="stylesheet" href="/css/style-index.css">
+</head>
+<body>
+    <div class="container">
+        <div id="notification" class="notification"></div>
+        <h1>Create a Secure Message</h1>
+        <p class="subtitle">Your message will be encrypted and stored for a single viewing.</p>
+        
+        <div id="create-view">
+            <label for="message">Your Secret Message:</label>
+            <textarea id="message" placeholder="Type your secret message here..."></textarea>
+            
+            <div class="checkbox-option">
+                <label>
+                    <input type="checkbox" id="require-password-cb" checked>
+                    <span>Require Password</span>
+                </label>
+            </div>
+
+            <div id="password-section">
+                <label for="password">Encryption Password:</label>
+                <input type="password" id="password" placeholder="Enter a strong password">
+                <div class="password-strength"><div id="password-strength-bar" class="password-strength-bar"></div></div>
+            </div>
+            
+            <div class="options-group">
+                <label>Security Level:</label>
+                <div class="radio-options">
+                    <label>
+                        <input type="radio" name="security" value="normal" checked>
+                        <span>Normal</span>
+                    </label>
+                    <label>
+                        <input type="radio" name="security" value="secure">
+                        <span>Secure (Anti-Screenshot)</span>
+                    </label>
+                </div>
+            </div>
+
+            <label for="timer">Self-destruct timer (seconds):</label>
+            <input type="number" id="timer" min="5" max="300" value="10">
+            <button id="create-btn">Generate Burn Link</button>
+            
+            <div id="result" style="display:none; margin-top:20px;">
+                <label>Your One-Time Burn Link is Ready:</label>
+                <button id="copy-link-btn">Copy Link</button>
+                <p class="note">Share this link. It will work exactly once.</p>
+            </div>
+        </div>
+    </div>
+    <script src="/js/app-index.js"></script>
+</body>
+</html>

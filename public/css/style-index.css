@@ -1,0 +1,50 @@
+:root {
+    --bg-dark: #121212; --bg-medium: #1e1e1e; --bg-light: #2a2a2a;
+    --border-color: #333; --primary-color: #00ff7f; --accent-color: #00e673;
+    --text-color: #e0e0e0; --subtitle-color: #aaa; --input-border: #444;
+    --error-color: #ff4d4d;
+}
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-dark); color: var(--text-color); display: flex;
+    justify-content: center; align-items: center; min-height: 100vh;
+    margin: 0; padding: 20px; box-sizing: border-box;
+}
+.container {
+    width: 100%; max-width: 600px; background-color: var(--bg-medium);
+    padding: 30px; border-radius: 12px; box-shadow: 0 6px 30px rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--border-color);
+}
+h1 { text-align: center; color: var(--primary-color); margin-bottom: 5px; font-size: 2.2em; }
+p.subtitle { text-align: center; margin-top: 0; color: var(--subtitle-color); font-style: italic; font-size: 0.95em; margin-bottom: 25px; }
+label { display: block; margin-bottom: 8px; font-weight: bold; }
+textarea, input[type="password"], input[type="text"], input[type="number"] {
+    width: 100%; padding: 12px; margin-bottom: 20px; background-color: var(--bg-light);
+    border: 1px solid var(--input-border); border-radius: 6px; color: var(--text-color);
+    font-size: 16px; box-sizing: border-box;
+}
+input[disabled] { background-color: #222; opacity: 0.5; cursor: not-allowed; }
+textarea:focus, input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(0, 255, 127, 0.2); outline: none; }
+textarea { min-height: 150px; resize: vertical; }
+.password-strength { height: 5px; background-color: var(--input-border); margin-top: -15px; margin-bottom: 20px; border-radius: 2px; overflow: hidden; transition: opacity 0.3s; }
+.password-strength-bar { height: 100%; transition: width 0.3s ease, background-color 0.3s ease; }
+.password-strength-bar.weak { background-color: var(--error-color); }
+.password-strength-bar.medium { background-color: orange; }
+.password-strength-bar.strong { background-color: var(--primary-color); }
+button { width: 100%; padding: 15px; background-color: var(--primary-color); color: var(--bg-dark); border: none; border-radius: 6px; font-size: 1.1em; font-weight: bold; cursor: pointer; }
+button:disabled { background-color: #555; cursor: not-allowed; color: #999; }
+#copy-link-btn {
+    background-color: var(--bg-light); color: var(--primary-color);
+    border: 1px dashed var(--primary-color);
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+#copy-link-btn:hover { background-color: var(--primary-color); color: var(--bg-dark); }
+.notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background-color: rgba(0, 0, 0, 0.85); color: var(--text-color); padding: 10px 20px; border-radius: 5px; opacity: 0; transition: opacity 0.3s ease, top 0.3s ease; z-index: 1000; }
+.notification.show { opacity: 1; top: 20px; }
+.options-group label { margin-bottom: 10px; }
+.radio-options, .checkbox-option { display: flex; gap: 20px; justify-content: flex-start; align-items: center; margin-bottom: 20px; }
+.radio-options label, .checkbox-option label { display: flex; align-items: center; cursor: pointer; font-weight: normal; padding: 10px 15px; border: 1px solid var(--input-border); border-radius: 6px; transition: background-color 0.2s, border-color 0.2s; }
+.radio-options input[type="radio"], .checkbox-option input[type="checkbox"] { display: none; }
+.radio-options input[type="radio"]:checked + span, .checkbox-option input[type="checkbox"]:checked + span { color: var(--primary-color); font-weight: bold; }
+.radio-options label:has(input:checked), .checkbox-option label:has(input:checked) { background-color: rgba(0, 255, 127, 0.1); border-color: var(--primary-color); }
+p.note { font-size: 0.9em; color: var(--subtitle-color); text-align: center; margin-top: 10px; }
